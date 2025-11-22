@@ -1,7 +1,11 @@
 package com.dvc.OTAction.utils;
 
 import com.dvc.OTAction.dto.TextOperation;
+import org.springframework.context.annotation.Configuration;
+import org.w3c.dom.Text;
 
+import java.util.List;
+@Configuration
 public class OTUtils {
 
     /**
@@ -11,7 +15,7 @@ public class OTUtils {
      * @param doc       The document string.
      * @param operation The operation to apply.
      * @return The resulting string.
-     * @work
+     * @Work
      * If the operation is an insertion operation the doc insertes the x string,
      *
      * if the operation is delete, it forward deletes x characters by
@@ -65,7 +69,64 @@ public class OTUtils {
      * @Work
      * Return the inverse of any operation. above (basically ctrl+Z functionality provide karti hai
      * since many users will be typing in the same  document, we cant just inverse the last operation
+     * DocIdx is the position of the cursor in the old doc, and it represents how much of the doc is read.
      */
+     public static TextOperation invert(String doc,TextOperation operation){
+         TextOperation inverse = new TextOperation();
+         int docIdx = 0;
+         for(Object op: operation.getOps()){
+             if(TextOperation.isRetain(op)){
+                 int retainCount = (Integer) op;
+                 inverse.retain(retainCount);
+                 docIdx += retainCount;
+             }
+             else if(TextOperation.isInsert(op)){
+                 inverse.delete(((String)op).length());
+             }
+             else if(TextOperation.isDelete(op)){
+                 int deleteCnt = -(Integer)op;
+                 inverse.insert(doc.substring(docIdx, docIdx + deleteCnt));
+             }
+         }
+         return inverse;
+     }
 
+//     public static TextOperation compose(TextOperation op1, TextOperation op2){
+//
+//         if(op1.getTargetLength() != op2.getBaseLength()){
+//             throw new IllegalArgumentException("Compose error: op1 target length (" + op1.getTargetLength() +
+//                     ") must match op2 base length (" + op2.getBaseLength() + ").");
+//         }
+//
+//         TextOperation composed = new TextOperation();
+//         List<Object> ops1 = op1.getOps();
+//         List<Object> ops2 = op2.getOps();
+//         int i1 = 0;
+//         int i2 = 0;
+//         Object currOperation1 = (i1 < ops1.size())? ops1.get(i1++):null;
+//         Object currOperation2 = (i2 < ops2.size())? ops2.get(i2++):null;
+//
+//         while(currOperation1 != null && currOperation2 != null){
+//
+//             if(TextOperation.isDelete(currOperation1)){
+//                 composed.delete((Integer) currOperation1);
+//                 currOperation1 = (i1 < ops1.size())?ops1.get(i1++):null;
+//                 continue;
+//             }
+//             if(TextOperation.isInsert(currOperation2)){
+//                 composed.insert((String)currOperation2);
+//                 currOperation2 = (i2 < ops2.size())?ops2.get(i2++):null;
+//                 continue;
+//             }
+//
+//             if(currOperation1 == null){
+//                 throw new IllegalArgumentException("Cannot compose: op2 is longer than op1 affects.");
+//             }
+//             if(currOperation2 == null){
+//                 throw new IllegalArgumentException("Cannot compose: op1 is longer than op2 affects.");
+//             }
+//
+//         }
+//     }
 
 }
