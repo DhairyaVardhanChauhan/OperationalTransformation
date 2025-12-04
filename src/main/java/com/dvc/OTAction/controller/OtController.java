@@ -11,6 +11,7 @@ import com.codecafe.backend.dto.IncomingOperationPayload;
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 @Controller
@@ -26,6 +27,7 @@ public class OtController {
 
     @MessageMapping("/operation")
     public void handleOperation(@Payload IncomingOperationPayload payload, SimpMessageHeaderAccessor headerAccessor, Principal principal){
+        log.info("Operation received!");
         String clientId = payload.getClientId();
         String documentId = payload.getDocumentId();
         String sessionId = payload.getSessionId();
@@ -38,9 +40,9 @@ public class OtController {
 
         try{
             TextOperation operation = new TextOperation(payload.getOperation());
-            TextOperation transformedOp = otService.receiveOperation(sessionId,documentId,payload.getRevision(),operation);
+            TextOperation transformedOp = otService.receiveOperation(sessionId,documentId,payload.getRevision(),operation,clientId);
             // broadCastMessage
-            Map<String,Object> broadcastPayLoad = new HashMap<>();
+            ConcurrentHashMap<String,Object> broadcastPayLoad = new ConcurrentHashMap<>();
             broadcastPayLoad.put("documentId",documentId);
             broadcastPayLoad.put("clientId",clientId);
             broadcastPayLoad.put("operation",transformedOp.getOps());
@@ -51,7 +53,9 @@ public class OtController {
             String allDestinations = "/topic/sessions";
             messagingTemplate.convertAndSend(allDestinations,broadcastPayLoad);
             String ackDestination = "/topic/ack/" + clientId;
-            messagingTemplate.convertAndSend(ackDestination, "ack");
+            Map<String,String> mp = new HashMap<>();
+            mp.put("ACK","ack");
+            messagingTemplate.convertAndSend(ackDestination,mp);
             logger.fine("Sent ACK to client [" + clientId + "] at " + ackDestination);
         }catch (Exception e){
             logger.warning(e.getMessage());
@@ -60,3 +64,4 @@ public class OtController {
     }
 
 }
+

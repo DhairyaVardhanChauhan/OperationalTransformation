@@ -22,7 +22,6 @@ public class TextOperation {
         this.baseLength = 0;
         this.targetLength = 0;
     }
-
     public TextOperation(List<Object> ops) {
         this();
         for (Object op : ops) {
@@ -124,8 +123,8 @@ public class TextOperation {
             String lastOp = (String) this.ops.get(this.ops.size() - 1);
             this.ops.set(this.ops.size() - 1, lastOp + str);
         }
-        else if(!this.ops.isEmpty() && isDelete(this.ops.get(this.ops.size()-1))){
-            if(this.ops.size() >= 2 && isInsert(this.ops.get(this.ops.size()-2))){
+        else if(!this.ops.isEmpty() && isDelete(this.ops.get(this.ops.size()-1))){  // last operation delete
+            if(this.ops.size() >= 2 && isInsert(this.ops.get(this.ops.size()-2))){ // if the second last insert is the delete operation
                 String secondLastOp = (String) this.ops.get(this.ops.size() - 2);
                 this.ops.set(this.ops.size() - 2, secondLastOp + str);
             }
@@ -140,4 +139,7 @@ public class TextOperation {
         }
         return this;
     }
+
+
+
 }
