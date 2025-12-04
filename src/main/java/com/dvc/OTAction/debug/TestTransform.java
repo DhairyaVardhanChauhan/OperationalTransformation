@@ -31,7 +31,7 @@ public class TestTransform {
 
         // ======== Run transform() ========
         try {
-            String result1 = OTUtils.apply(doc, op1);       // apply op1 first
+            String result1 = OTUtils.apply(doc, op1);       // apply op1 first ye woh hai joh frontend bhejega
             String result2 = OTUtils.apply(doc, op2);       // apply op2 first
 
             List<TextOperation> result = OTUtils.transform(op1, op2);
